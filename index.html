@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f4f4f1">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="日语单词">
+  <title>日语单词</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="words-extra.js" defer></script>
+  <script src="jlpt-n1.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <main id="main"></main>
+    <nav class="nav" aria-label="主导航">
+      <button data-page="home"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M3.5 10.5 12 3.8l8.5 6.7v9a.8.8 0 0 1-.8.8h-5.2v-6.1h-5v6.1H4.3a.8.8 0 0 1-.8-.8z"/></svg><span>学习</span></button>
+      <button data-page="library"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M5 4.5h11.5a2 2 0 0 1 2 2v13H7a2 2 0 0 1-2-2zm0 13a2 2 0 0 1 2-2h11.5M9 8h5.5"/></svg><span>词库</span></button>
+      <button data-page="settings"><svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8.7 12h6.6M12 8.7v6.6"/></svg><span>设置</span></button>
+    </nav>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
