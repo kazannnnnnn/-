@@ -28,3 +28,12 @@
 .home-view .nav{background:rgba(238,245,230,.72);border-top-color:#f9fff7a6}
 @media(max-height:650px){.home-view .plan-content{padding:18px 0}}
 .load-more{display:block;width:100%;margin-top:14px;padding:15px;border:1px solid #e5eae4;border-radius:13px;background:#fff;color:#547560;font-size:12px}
+.review-link{width:100%;border:0;background:transparent;color:#426c51;padding:17px 3px 0;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:8px}
+.review-link span{font-size:15px}.small-action{border:0;border-radius:11px;background:#eaf2e9;color:#416650;padding:10px 16px;font-size:12px;font-weight:600}.small-action:disabled{opacity:.45;cursor:default}
+.filter-tabs{display:flex;gap:8px;margin:0 0 16px}.filter-tabs button{border:1px solid #e3e9e2;background:#fff;border-radius:22px;padding:8px 15px;color:#798a7d;font-size:12px}.filter-tabs button.selected{background:#426c51;border-color:#426c51;color:white}
+.stepper{gap:8px}.stepper input{width:48px;text-align:center;border:1px solid #e4ece3;border-radius:8px;padding:7px 2px;background:#fff;color:#365d47;font:inherit;font-size:14px;-moz-appearance:textfield}.stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.setting-row select{max-width:112px;border:1px solid #e4ece3;border-radius:10px;padding:9px;background:#f8faf7;color:#3f6354;font:inherit;font-size:12px}
+.settings-link{width:100%;display:flex;justify-content:space-between;align-items:center;text-align:left;color:var(--ink);font:inherit;cursor:pointer}.settings-link strong,.settings-link small{display:block}.settings-link strong{font-size:13px}.settings-link small{font-size:11px;color:var(--muted);margin-top:7px}.settings-link>span:last-child{font-size:24px;color:#97aa9c}
+.subpage-head{display:flex;align-items:center;gap:16px;margin:50px 0 15px}.subpage-head h1{font-size:23px;font-weight:600;margin:0}.history-row{padding:17px 0;border-bottom:1px solid var(--line)}.history-row:last-child{border:0}.history-row strong{display:block;font-size:13px;font-weight:600}.history-row span{display:block;margin-top:8px;color:#89978c;font-size:11px;line-height:1.6}
+.flashcard{position:relative}.study-star{position:absolute;top:21px;right:21px;line-height:1}
+.backup-card>strong,.backup-card>small{display:block}.backup-card>strong{font-size:13px}.backup-card>small{font-size:11px;color:var(--muted);margin-top:7px}.backup-actions{display:flex;gap:10px;margin-top:15px}
