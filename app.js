@@ -105,7 +105,30 @@ function study() {
   document.getElementById('back').onclick=()=>{page='home';render();};document.getElementById('sound').onclick=()=>speak(w.reading);document.getElementById('study-star').onclick=()=>{state.favorites=state.favorites.includes(w.id)?state.favorites.filter(id=>id!==w.id):[...state.favorites,w.id];save();study();};
   if(!showing)document.getElementById('reveal').onclick=()=>{showing=true;study();};else main.querySelectorAll('[data-rating]').forEach(b=>b.onclick=()=>rate(b.dataset.rating));
 }
-function speak(text){if(!('speechSynthesis' in window)){toast('当前浏览器不支持语音播放');return;}window.speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang='ja-JP';utterance.rate=.85;utterance.onerror=()=>toast('语音播放不可用，请检查设备语音设置');window.speechSynthesis.speak(utterance);}
+const voicePreferenceKey='kotoba-japanese-voice';
+function japaneseVoices(){return 'speechSynthesis' in window?window.speechSynthesis.getVoices().filter(voice=>/^ja(?:[-_]|$)/i.test(voice.lang)):[];}
+function preferredVoice(){try{return localStorage.getItem(voicePreferenceKey)||'';}catch(_){return '';}}
+function speak(text){
+  if(!('speechSynthesis' in window)||!('SpeechSynthesisUtterance' in window)){toast('当前浏览器不支持语音播放');return;}
+  const synth=window.speechSynthesis,voices=japaneseVoices(),preferred=preferredVoice();
+  // Prefer an explicitly labelled enhanced voice when available; otherwise let the device choose.
+  const voice=voices.find(item=>item.voiceURI===preferred)||(!preferred&&voices.find(item=>/enhanced|premium|高品质|增强/i.test(item.name)));
+  synth.cancel();const utterance=new SpeechSynthesisUtterance(text);utterance.lang='ja-JP';utterance.rate=1;
+  if(voice)utterance.voice=voice;
+  utterance.onerror=event=>{if(!['canceled','interrupted'].includes(event.error))toast('语音播放不可用，请检查设备语音设置');};
+  synth.speak(utterance);
+}
+function updateVoiceOptions(){
+  const select=document.getElementById('voice');if(!select)return;
+  const voices=japaneseVoices(),preferred=preferredVoice();
+  select.replaceChildren(new Option('自动选择', ''));
+  for(const voice of voices)select.add(new Option(voice.name,voice.voiceURI));
+  if(preferred&&!voices.some(voice=>voice.voiceURI===preferred))select.add(new Option('已选声音暂不可用',preferred));
+  select.value=preferred;
+  const hint=document.getElementById('voice-hint');
+  hint.textContent=!('speechSynthesis' in window)?'当前浏览器不支持语音播放':voices.length?'选择并试听设备提供的日语声音':'使用设备默认日语声音';
+}
+if('speechSynthesis' in window)window.speechSynthesis.addEventListener('voiceschanged',updateVoiceOptions);
 function rate(rating) {
   refreshDay(); const old=state.progress[current]; const isNew=!old; const earlyManual=sessionMode!=='daily' && old && old.due>dateKey();
   const previousStage=old?.stage || 0; const intervals=[1,1,3,7,14,30,60];
@@ -127,9 +150,10 @@ function library() {
   main.querySelectorAll('[data-star]').forEach(b=>b.onclick=()=>{const id=b.dataset.star;state.favorites=state.favorites.includes(id)?state.favorites.filter(x=>x!==id):[...state.favorites,id];save();library();});
 }
 function settings() {
-  main.innerHTML=`<h1 class="page-title">设置</h1><div class="settings-card"><div class="setting-row"><div><strong>每日新词目标</strong><small>每天 1–200 个，可直接输入</small></div><div class="stepper"><button id="minus" aria-label="减少新词目标">−</button><input id="goal" type="number" inputmode="numeric" min="1" max="200" step="1" value="${state.goal}" aria-label="每日新词目标"><button id="plus" aria-label="增加新词目标">＋</button></div></div></div><div class="settings-card"><div class="setting-row"><div><strong>单词顺序</strong><small>复习优先到期词；随机顺序每天更新</small></div><select id="order" aria-label="单词顺序"><option value="source">词库顺序</option><option value="kana">五十音序</option><option value="random">随机</option></select></div></div><button class="settings-card settings-link" id="history"><span><strong>学习记录</strong><small>已学 ${Object.keys(state.progress).filter(id=>wordById.has(id)).length} 词 · 收藏 ${state.favorites.length} 词</small></span><span aria-hidden="true">›</span></button><div class="settings-card backup-card"><strong>学习数据</strong><small>将记录保存到文件，或从文件恢复。</small><div class="backup-actions"><button class="small-action" id="export-data">导出记录</button><button class="small-action" id="import-data">导入记录</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div></div><div class="install"><strong>像 App 一样使用</strong><br>在 iPhone 的 Safari 中点按分享按钮，选择“添加到主屏幕”，再从主屏幕打开即可隐藏浏览器工具栏。Safari 和主屏幕的学习记录可能不互通；如需迁移，请先导出记录，再到主屏幕应用中导入。清除数据可能导致丢失。</div><p class="fineprint">词形和读音参考 <a href="https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project">JMdict / EDRDG</a>（2021 年数据），采用 <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> 授权。N1 词条来自 <a href="https://github.com/5mdld/anki-jlpt-decks">egg rolls JLPT 10k 卡组</a>，采用 <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hans">CC BY-NC 4.0</a>，仅限非商业用途。词条经筛选、整理和部分修改，尚未全部校对，并非官方 N1 词表。发音使用设备自带的日语语音。</p>`;
+  main.innerHTML=`<h1 class="page-title">设置</h1><div class="settings-card"><div class="setting-row"><div><strong>每日新词目标</strong><small>每天 1–200 个，可直接输入</small></div><div class="stepper"><button id="minus" aria-label="减少新词目标">−</button><input id="goal" type="number" inputmode="numeric" min="1" max="200" step="1" value="${state.goal}" aria-label="每日新词目标"><button id="plus" aria-label="增加新词目标">＋</button></div></div></div><div class="settings-card"><div class="setting-row"><div><strong>单词顺序</strong><small>复习优先到期词；随机顺序每天更新</small></div><select id="order" aria-label="单词顺序"><option value="source">词库顺序</option><option value="kana">五十音序</option><option value="random">随机</option></select></div></div><div class="settings-card voice-card"><div class="setting-row"><div><strong>日语发音</strong><small id="voice-hint">选择并试听设备提供的日语声音</small></div><button class="small-action" id="voice-preview" type="button">试听</button></div><select id="voice" aria-label="日语发音声音"><option value="">自动选择</option></select></div><button class="settings-card settings-link" id="history"><span><strong>学习记录</strong><small>已学 ${Object.keys(state.progress).filter(id=>wordById.has(id)).length} 词 · 收藏 ${state.favorites.length} 词</small></span><span aria-hidden="true">›</span></button><div class="settings-card backup-card"><strong>学习数据</strong><small>将记录保存到文件，或从文件恢复。</small><div class="backup-actions"><button class="small-action" id="export-data">导出记录</button><button class="small-action" id="import-data">导入记录</button><input id="backup-file" type="file" accept="application/json,.json" hidden></div></div><div class="install"><strong>像 App 一样使用</strong><br>在 iPhone 的 Safari 中点按分享按钮，选择“添加到主屏幕”，再从主屏幕打开即可隐藏浏览器工具栏。Safari 和主屏幕的学习记录可能不互通；如需迁移，请先导出记录，再到主屏幕应用中导入。清除数据可能导致丢失。</div><p class="fineprint">词形和读音参考 <a href="https://www.edrdg.org/wiki/index.php/JMdict-EDICT_Dictionary_Project">JMdict / EDRDG</a>（2021 年数据），采用 <a href="https://creativecommons.org/licenses/by-sa/3.0/">CC BY-SA 3.0</a> 授权。N1 词条来自 <a href="https://github.com/5mdld/anki-jlpt-decks">egg rolls JLPT 10k 卡组</a>，采用 <a href="https://creativecommons.org/licenses/by-nc/4.0/deed.zh-hans">CC BY-NC 4.0</a>，仅限非商业用途。词条经筛选、整理和部分修改，尚未全部校对，并非官方 N1 词表。发音使用设备自带的日语语音。</p>`;
   function setGoal(value){const n=Number(value);state.goal=Number.isFinite(n)&&n>0?Math.min(200,Math.max(1,Math.floor(n))):state.goal;save();settings();}
   document.getElementById('goal').onchange=e=>setGoal(e.target.value);document.getElementById('minus').onclick=()=>setGoal(state.goal-1);document.getElementById('plus').onclick=()=>setGoal(state.goal+1);
+  updateVoiceOptions();document.getElementById('voice').onchange=e=>{try{if(e.target.value)localStorage.setItem(voicePreferenceKey,e.target.value);else localStorage.removeItem(voicePreferenceKey);}catch(_){toast('无法保存声音设置');}};document.getElementById('voice-preview').onclick=()=>speak('うながす');
   const order=document.getElementById('order');order.value=state.order;order.onchange=e=>{state.order=e.target.value;save();};document.getElementById('history').onclick=()=>{page='history';render();};document.getElementById('export-data').onclick=exportData;document.getElementById('import-data').onclick=()=>document.getElementById('backup-file').click();document.getElementById('backup-file').onchange=importData;
 }
 function exportData() {
